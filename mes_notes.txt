@@ -1,0 +1,49 @@
+type_comptage
+
+nb_enfants
+    nombre de travailleur entre 2 et 8
+    si égale à 0 alors nb cpu-2
+
+nb_lg
+
+liste_fichier
+
+
+
+int worker_id;
+int fork_res;
+
+int **pipes_ptow = malloc(sizeof(int *) * nb_enfants);
+int pipe_wtop[2]
+int pipe_wtoc[2]
+
+pipe(pipe_wtop);
+pipe(pipe_wtoc);
+
+int pid_collecteur = fork();
+int pid_producteur;
+
+for(i to nb_enfants){
+    if(pid_client == getpid()){
+        pipes_ptow[i] = malloc(sizeof(int) * 2);
+        worker_id = i;
+        fork();
+    }
+}
+
+if(pid_client == getpid()){
+    worker_id = -1;
+    pid_producteur = fork();
+}
+if(pid_collecteur == getpid()){
+    worker_id = -1;
+}
+
+if(worker_id >= 0){
+    close(pipes_ptow[worker_id][1])
+
+    //delire de worker
+
+}
+
+close_pipe_for_worker()
