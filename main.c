@@ -55,21 +55,69 @@ void init_p_or_c(int pid_father, int *pid_son){
     }
 }
 
-void send_data(int *pipe, char *data){
-    char msg[255];
-    sprintf(msg, "Tu est le worker 50");
-    write(*pipe, msg, sizeof(msg));
+/**
+* Récupère le fichier, arrête le programme s'il y a une erreur.
+* return le fichier
+*/
+FILE * get_file(char *path){
+    FILE *file = fopen(path, "r");
+    if (file == NULL){
+        printf("Erreur de fichier\n");
+        exit(2);
+    }
+    return file;
+}
+
+/**
+* Return un bloc de donnée selon la taille souhaitée, à partir d'un fichier
+*
+* @param FILE *file : fichier contenant la donnée
+* @param int nb_lg : taille du bloc (nombre de ligne par bloc)
+* @return char * : bloc de donnée
+*/
+char * get_data_block(FILE *file, int nb_lg){
+    int LINE_SIZE = 1024;
+    char data_line[LINE_SIZE];
+    char *data_block = malloc(sizeof(char) * LINE_SIZE * nb_lg);
+
+    int i = 0;
+    while (i < nb_lg && fgets(data_line, LINE_SIZE, file)) {
+        strcat(data_block, data_line);
+        i++;
+    }
+
+    return data_block;
+}
+
+
+void send_data_to_workers(FILE *file, int **pipes_ptow, int nb_enfants, int nb_lg){
+    char *block;
+    int i = 0;
+    int file_has_data = 1;
+    while (i<nb_enfants && file_has_data) {
+        block = get_data_block(file, nb_lg);
+        if(block[0] == '\0'){
+            file_has_data = 0;
+            printf("salut\n");
+            write(pipes_ptow[i][1], "DONE", sizeof(char) * strlen("DONE") + 1);
+        }
+        else{
+            write(pipes_ptow[i][1], block, sizeof(char) * strlen(block) + 1);
+        }
+        i++;
+    }
 }
 
 int main(int argc, char const *argv[]) {
 
     int nb_enfants = 2;
+    int nb_lg = 20;
 
     int worker_id;
-    int state;
-
     int pid_producteur = -1;
     int pid_collecteur = -1;
+    int pid_client = getpid();
+    int status;
 
     int **pipes_ptow = malloc(sizeof(int *) * nb_enfants);
     int pipe_wtop[2];
@@ -78,15 +126,13 @@ int main(int argc, char const *argv[]) {
     pipe(pipe_wtop);
     pipe(pipe_wtoc);
 
-    int pid_client = getpid();
-
     //creation worker
-    int i = 0;
-    while((pid_client == getpid()) && (i < nb_enfants)){
-        pipes_ptow[i] = malloc(sizeof(int)*2);
-        worker_id = i;
-        pipe(pipes_ptow[i]);
-        i++;
+    int worker_created = 0;
+    while((pid_client == getpid()) && (worker_created < nb_enfants)){
+        worker_id = worker_created;
+        pipes_ptow[worker_id] = malloc(sizeof(int)*2);
+        pipe(pipes_ptow[worker_id]);
+        worker_created++;
         fork();
     }
 
@@ -102,19 +148,12 @@ int main(int argc, char const *argv[]) {
         //Fermer les pipes_ptow en lecteur [0]
         printf("Producteur OK\n");
 
+        FILE *file = get_file("extra_mini_lorem.txt");
 
-        FILE *file = fopen("extra_mini_lorem.txt", "r");
-        
-
+        send_data_to_workers(file, pipes_ptow, nb_enfants, nb_lg);
         /*envoie donnée aux workers*/
-        for(int i = 0; i<nb_enfants; i++){
-            char msg[255];
-            sprintf(msg, "Tu est le worker %d", i);
-            write(pipes_ptow[i][1], msg, sizeof(msg));
 
-            //send_data(&pipes_ptow[i][1]);
-        }
-
+        /*fin la*/
     }
 
     if(pid_collecteur == getpid()){
@@ -123,18 +162,18 @@ int main(int argc, char const *argv[]) {
 
         char msg[255];
         read(pipe_wtoc[0], msg, sizeof(msg));
-        printf("%s\n", msg);
+        //printf("COLLECTEUR : %s\n", msg);
 
         read(pipe_wtoc[0], msg, sizeof(msg));
-        printf("%s\n", msg);
+        //printf("COLLECTEUR : %s\n", msg);
     }
 
     if(worker_id >= 0){
         //Do worker stuff
         printf("Worker %d OK\n", worker_id);
-        char msg[255];
+        char msg[2000];
         read(pipes_ptow[worker_id][0], msg, sizeof(msg));
-        printf("Message pour %d : %s\n", worker_id, msg);
+        printf("--------------------- Message pour %d ---------------------\n%s\n--------------------- FIN ---------------------\n", worker_id, msg);
 
         sprintf(msg, "OUI");
         write(pipe_wtoc[1], msg, sizeof(msg));
@@ -142,10 +181,10 @@ int main(int argc, char const *argv[]) {
 
 
     if(pid_client == getpid()){
-        wait(&state);
-        wait(&state);
-        wait(&state);
-        wait(&state);
+        wait(&status);
+        wait(&status);
+        wait(&status);
+        wait(&status);
 
         printf("\n----- CLIENT : fermeture du programme -----\n");
     }

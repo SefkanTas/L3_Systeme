@@ -96,7 +96,7 @@ int readFileTest(int argc, char const *argv[]) {
     return 0;
 }
 
-int main(int argc, char const *argv[]) {
+int maian(int argc, char const *argv[]) {
 
     int LINE_SIZE = 1024;
     int nb_lg = 11;
@@ -114,5 +114,12 @@ int main(int argc, char const *argv[]) {
     printf("\nFINN\n");
     //strcat(dest, src);
 
+    return 0;
+}
+
+int main(int argc, char const *argv[]) {
+    char oui[7] = "bonjour";
+    printf("%s\n", oui);
+    printf("%ld\n", strlen(oui));
     return 0;
 }
