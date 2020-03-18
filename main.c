@@ -75,13 +75,12 @@ FILE * get_file(char *path){
 * @param int nb_lg : taille du bloc (nombre de ligne par bloc)
 * @return char * : bloc de donnée
 */
-char * get_data_block(FILE *file, int nb_lg){
-    int LINE_SIZE = 1024;
-    char data_line[LINE_SIZE];
-    char *data_block = malloc(sizeof(char) * LINE_SIZE * nb_lg);
+char * get_data_block(FILE *file, int nb_lg, int line_size){
+    char data_line[line_size];
+    char *data_block = malloc(sizeof(char) * line_size * nb_lg);
 
     int i = 0;
-    while (i < nb_lg && fgets(data_line, LINE_SIZE, file)) {
+    while (i < nb_lg && fgets(data_line, line_size, file)) {
         strcat(data_block, data_line);
         i++;
     }
@@ -89,16 +88,18 @@ char * get_data_block(FILE *file, int nb_lg){
     return data_block;
 }
 
-
-void send_data_to_workers(FILE *file, int **pipes_ptow, int nb_enfants, int nb_lg){
+/**
+* Envoie la première vagues de données vers les workers
+*/
+void send_data_to_workers(FILE *file, int **pipes_ptow, int nb_enfants, int nb_lg, int line_size){
     char *block;
     int i = 0;
     int file_has_data = 1;
     while (i<nb_enfants && file_has_data) {
-        block = get_data_block(file, nb_lg);
+        block = get_data_block(file, nb_lg, line_size);
         if(block[0] == '\0'){
+            /* Si le fichier est vide */
             file_has_data = 0;
-            printf("salut\n");
             write(pipes_ptow[i][1], "DONE", sizeof(char) * strlen("DONE") + 1);
         }
         else{
@@ -112,6 +113,7 @@ int main(int argc, char const *argv[]) {
 
     int nb_enfants = 2;
     int nb_lg = 20;
+    int line_size = 1024;
 
     int worker_id;
     int pid_producteur = -1;
@@ -146,19 +148,17 @@ int main(int argc, char const *argv[]) {
     if(pid_producteur == getpid()){
         //Do producteur stuff
         //Fermer les pipes_ptow en lecteur [0]
-        printf("Producteur OK\n");
+        //printf("Producteur OK\n");
 
         FILE *file = get_file("extra_mini_lorem.txt");
 
-        send_data_to_workers(file, pipes_ptow, nb_enfants, nb_lg);
-        /*envoie donnée aux workers*/
+        send_data_to_workers(file, pipes_ptow, nb_enfants, nb_lg, line_size);
 
-        /*fin la*/
     }
 
     if(pid_collecteur == getpid()){
         //Do collecteur stuff
-        printf("Collecteur OK\n");
+        //printf("Collecteur OK\n");
 
         char msg[255];
         read(pipe_wtoc[0], msg, sizeof(msg));
@@ -170,13 +170,13 @@ int main(int argc, char const *argv[]) {
 
     if(worker_id >= 0){
         //Do worker stuff
-        printf("Worker %d OK\n", worker_id);
-        char msg[2000];
-        read(pipes_ptow[worker_id][0], msg, sizeof(msg));
-        printf("--------------------- Message pour %d ---------------------\n%s\n--------------------- FIN ---------------------\n", worker_id, msg);
+        //printf("Worker %d OK\n", worker_id);
+        char data[line_size * nb_lg];
+        read(pipes_ptow[worker_id][0], data, sizeof(data));
+        printf("--------------------- Message pour %d ---------------------\n%s\n--------------------- FIN ---------------------\n", worker_id, data);
 
-        sprintf(msg, "OUI");
-        write(pipe_wtoc[1], msg, sizeof(msg));
+        sprintf(data, "OUI");
+        write(pipe_wtoc[1], data, sizeof(data));
     }
 
 

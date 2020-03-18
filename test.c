@@ -117,9 +117,20 @@ int maian(int argc, char const *argv[]) {
     return 0;
 }
 
+unsigned int count_char(char *data){
+    unsigned int count = 0;
+    int i = 0;
+    while (data[i] != '\0') {
+        count++;
+        i++;
+    }
+    return count;
+}
+
 int main(int argc, char const *argv[]) {
-    char oui[7] = "bonjour";
-    printf("%s\n", oui);
-    printf("%ld\n", strlen(oui));
+    char *c = "1234\n5";
+    unsigned int count = count_char(c);
+
+    printf("%d\n", count);
     return 0;
 }
