@@ -3,10 +3,11 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <ctype.h>
 
 
 typedef struct element{
-    char *key;
+    char key[50];
     unsigned int count;
 } element;
 
@@ -42,7 +43,7 @@ void add_element(element_array *ea, element e){
 **/
 element init_element(char *key, unsigned int count){
     element e;
-    e.key = malloc(sizeof(char) * strlen(key));
+    //e.key = malloc(sizeof(char) * strlen(key));
     strcpy(e.key, key);
     e.count = count;
 
@@ -184,7 +185,7 @@ element_array char_count(char *data){
     element_array ea = init_element_array();
     while (data[i] != '\0') {
         if(!is_separator(data[i])){
-            char string[] = {data[i]};
+            char string[] = {toupper(data[i])};
             increment_element_count(&ea, string);
         }
         i++;
@@ -194,22 +195,26 @@ element_array char_count(char *data){
 }
 
 // a voir si c'est bien
-void send_count_data_wtoc(element_array *ea, int *pipe_wtoc){
-    for(int i = 0; i < ea->len; i++){
-        write(pipe_wtoc[1], &ea->array[i], sizeof(element));
+void send_count_data_wtoc(element_array ea, int *pipe_wtoc){
+    for(int i = 0; i < ea.len; i++){
+        write(pipe_wtoc[1], &ea.array[i], sizeof(element));
     }
+}
+
+void display_element(element e){
+    printf("%s => %d\n", e.key, e.count);
 }
 
 void display_element_array(element_array ea){
     for(int i = 0; i < ea.len; i++){
-        printf("%s => %d\n", ea.array[i].key, ea.array[i].count);
+        display_element(ea.array[i]);
     }
 }
 
 int main(int argc, char const *argv[]) {
 
     int nb_enfants = 2;
-    int nb_lg = 1;
+    int nb_lg = 4;
     int line_size = 1024;
 
     int worker_id;
@@ -257,29 +262,49 @@ int main(int argc, char const *argv[]) {
         //Do collecteur stuff
         //printf("Collecteur OK\n");
 
-        char msg[255];
-        read(pipe_wtoc[0], msg, sizeof(msg));
-        //printf("COLLECTEUR : %s\n", msg);
+        // char msg[255];
+        // read(pipe_wtoc[0], msg, sizeof(msg));
+        // printf("COLLECTEUR : %s\n", msg);
+        //
+        // read(pipe_wtoc[0], msg, sizeof(msg));
+        // printf("COLLECTEUR : %s\n", msg);
 
-        read(pipe_wtoc[0], msg, sizeof(msg));
-        //printf("COLLECTEUR : %s\n", msg);
+        element e;
+        read(pipe_wtoc[0], &e, sizeof(e));
+        printf("%s => %d\n", e.key, e.count);
+        read(pipe_wtoc[0], &e, sizeof(e));
+        printf("%s => %d\n", e.key, e.count);
+        read(pipe_wtoc[0], &e, sizeof(e));
+        printf("%s => %d\n", e.key, e.count);
+        read(pipe_wtoc[0], &e, sizeof(e));
+        printf("%s => %d\n", e.key, e.count);
+        read(pipe_wtoc[0], &e, sizeof(e));
+        printf("%s => %d\n", e.key, e.count);
+        read(pipe_wtoc[0], &e, sizeof(e));
+        printf("%s => %d\n", e.key, e.count);
+        read(pipe_wtoc[0], &e, sizeof(e));
+        printf("%s => %d\n", e.key, e.count);
+        read(pipe_wtoc[0], &e, sizeof(e));
+        printf("%s => %d\n", e.key, e.count);
+        read(pipe_wtoc[0], &e, sizeof(e));
+        printf("%s => %d\n", e.key, e.count);
+
+
     }
 
     if(worker_id >= 0){
-        //Do worker stuff
-        //printf("Worker %d OK\n", worker_id);
         char data[line_size * nb_lg];
         read(pipes_ptow[worker_id][0], data, sizeof(data));
 
+        //printf("%s\n", data);
+
         element_array element_cout = char_count(data);
-        display_element_array(element_cout);
+        //display_element_array(element_cout);
 
-        //printf("KEYY %s - count %d\n", element_cout.array[0].key, element_cout.array[0].count);
+        send_count_data_wtoc(element_cout, pipe_wtoc);
 
-        //printf("--------------------- Message pour %d ---------------------\n%s\n--------------------- FIN ---------------------\n", worker_id, data);
-
-        sprintf(data, "OUI");
-        write(pipe_wtoc[1], data, sizeof(data));
+        // sprintf(data, "OUI");
+        // write(pipe_wtoc[1], data, sizeof(data));
     }
 
 
