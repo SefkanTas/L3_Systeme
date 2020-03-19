@@ -128,9 +128,14 @@ unsigned int count_char(char *data){
 }
 
 int main(int argc, char const *argv[]) {
-    char *c = "1234\n5";
-    unsigned int count = count_char(c);
+    // char *c = "1234\n5";
+    // unsigned int count = count_char(c);
+    //
+    // printf("%d\n", count);
 
-    printf("%d\n", count);
+    char *a = "salut";
+    char b[] = "salut";
+    printf("a = %ld\n", strlen(a));
+    printf("b = %ld\n", strlen(b));
     return 0;
 }
