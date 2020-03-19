@@ -50,21 +50,28 @@ element init_element(char *key, unsigned int count){
     return e;
 }
 
-void increment_element_count(element_array *ea, char *key){
+void increment_element_count_by_n(element_array *ea, char *key, unsigned int n){
     int i = 0;
     int done = 0;
     while(i < ea->len && !done){
-        //printf("LA COMPARAISON %d :: %s %s %d\n", strcmp(ea->array[i].key, key), ea->array[i].key, key, i);
         if(strcmp(ea->array[i].key, key) == 0){
-            ea->array[i].count++;
+            ea->array[i].count += n;
             done = 1;
         }
         i++;
     }
     if(!done){
-        element e = init_element(key, 1);
+        element e = init_element(key, n);
         add_element(ea, e);
     }
+}
+
+void increment_element_count(element_array *ea, char *key){
+    increment_element_count_by_n(ea, key, 1);
+}
+
+void merge_element_count(element_array *ea, element e){
+    increment_element_count_by_n(ea, e.key, e.count);
 }
 
 void free_element_array(element_array *ea){
@@ -194,7 +201,12 @@ element_array char_count(char *data){
     return ea;
 }
 
-// a voir si c'est bien
+/**
+* send each element of an element_array array from a work to the collecteur
+*
+* @param element_array ea : the element_array that contains our data
+* @int *pipe_wtoc : pipe to communicate from worker to collecteur
+**/
 void send_count_data_wtoc(element_array ea, int *pipe_wtoc){
     for(int i = 0; i < ea.len; i++){
         write(pipe_wtoc[1], &ea.array[i], sizeof(element));
@@ -259,37 +271,14 @@ int main(int argc, char const *argv[]) {
     }
 
     if(pid_collecteur == getpid()){
-        //Do collecteur stuff
-        //printf("Collecteur OK\n");
 
-        // char msg[255];
-        // read(pipe_wtoc[0], msg, sizeof(msg));
-        // printf("COLLECTEUR : %s\n", msg);
-        //
-        // read(pipe_wtoc[0], msg, sizeof(msg));
-        // printf("COLLECTEUR : %s\n", msg);
+        element_array ea_count = init_element_array();
 
         element e;
-        read(pipe_wtoc[0], &e, sizeof(e));
-        printf("%s => %d\n", e.key, e.count);
-        read(pipe_wtoc[0], &e, sizeof(e));
-        printf("%s => %d\n", e.key, e.count);
-        read(pipe_wtoc[0], &e, sizeof(e));
-        printf("%s => %d\n", e.key, e.count);
-        read(pipe_wtoc[0], &e, sizeof(e));
-        printf("%s => %d\n", e.key, e.count);
-        read(pipe_wtoc[0], &e, sizeof(e));
-        printf("%s => %d\n", e.key, e.count);
-        read(pipe_wtoc[0], &e, sizeof(e));
-        printf("%s => %d\n", e.key, e.count);
-        read(pipe_wtoc[0], &e, sizeof(e));
-        printf("%s => %d\n", e.key, e.count);
-        read(pipe_wtoc[0], &e, sizeof(e));
-        printf("%s => %d\n", e.key, e.count);
-        read(pipe_wtoc[0], &e, sizeof(e));
-        printf("%s => %d\n", e.key, e.count);
-
-
+        for (size_t i = 0; i < 29; i++) {
+            read(pipe_wtoc[0], &e, sizeof(e));
+            merge_element_count(&ea_count, e);
+        }
     }
 
     if(worker_id >= 0){
