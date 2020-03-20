@@ -39,6 +39,7 @@ void add_element(element_array *ea, element e){
 *
 * @param char *key : la chaine de char pour la clé
 * @param unsigned int count : la valeur initial de count
+*
 * @return element : l'element initialisé
 **/
 element init_element(char *key, unsigned int count){
@@ -86,12 +87,13 @@ void free_element_array(element_array *ea){
 * Check si un char est un separateur
 *
 * @param char *c : char a tester
-* @return int
-*/
+*
+* @return int : 1 si c'est un separateur, 0 sinon
+**/
 int is_separator(char c){
     char separator_list[] = {
         '\n', '\t', ' ', ',', ';',
-        '!', '?', '.', ':'
+        '!', '?', '.', ':', '\r'
     };
     int list_size = sizeof(separator_list) / sizeof(char);
 
@@ -110,7 +112,7 @@ int is_separator(char c){
 /**
 * Check si un fork a bien fonctionné,
 * quitte le processus sinon.
-*/
+**/
 void fork_check(int fork_res){
     if(fork_res == -1){
         printf("Erreur de fork\n");
@@ -151,8 +153,9 @@ FILE * get_file(char *path){
 *
 * @param FILE *file : fichier contenant la donnée
 * @param int nb_lg : taille du bloc (nombre de ligne par bloc)
+*
 * @return char * : bloc de donnée
-*/
+**/
 char * get_data_block(FILE *file, int nb_lg, int line_size){
     char data_line[line_size];
     char *data_block = malloc(sizeof(char) * line_size * nb_lg);
@@ -166,10 +169,33 @@ char * get_data_block(FILE *file, int nb_lg, int line_size){
     return data_block;
 }
 
+// void send_data_to_worker(FILE *file, int pipes_ptow[], int nb_lg, int line_size){
+//     char *block;
+//     int i = 0;
+//     int file_has_data = 1;
+//
+//     block = get_data_block(file, nb_lg, line_size);
+//     write(pipes_ptow[1], block, sizeof(char) * strlen(block) + 1);
+//
+//
+//     while (i<nb_enfants && file_has_data) {
+//         block = get_data_block(file, nb_lg, line_size);
+//         if(block[0] == '\0'){
+//             /* Si le fichier est vide */
+//             file_has_data = 0;
+//             write(pipes_ptow[i][1], "DONE", sizeof(char) * strlen("DONE") + 1);
+//         }
+//         else{
+//             write(pipes_ptow[i][1], block, sizeof(char) * strlen(block) + 1);
+//         }
+//         i++;
+//     }
+// }
+
 /**
 * Envoie la première vagues de données vers les workers
 */
-void send_data_to_workers(FILE *file, int **pipes_ptow, int nb_enfants, int nb_lg, int line_size){
+void send_data_to_workers(FILE *file, int pipes_ptow[][2], int nb_enfants, int nb_lg, int line_size){
     char *block;
     int i = 0;
     int file_has_data = 1;
@@ -187,6 +213,14 @@ void send_data_to_workers(FILE *file, int **pipes_ptow, int nb_enfants, int nb_l
     }
 }
 
+
+/**
+* Compte le nombre d'occurrences d'un caractère dans une chaîne de caractère.
+*
+* @prama char *data : la chaîne de caractère
+*
+* @return element_array : element_array avec le nombre d'occurrences de chaque caractère
+**/
 element_array char_count(char *data){
     int i = 0;
     element_array ea = init_element_array();
@@ -226,7 +260,7 @@ void display_element_array(element_array ea){
 int main(int argc, char const *argv[]) {
 
     int nb_enfants = 2;
-    int nb_lg = 4;
+    int nb_lg = 5;
     int line_size = 1024;
 
     int worker_id;
@@ -235,7 +269,8 @@ int main(int argc, char const *argv[]) {
     int pid_client = getpid();
     int status;
 
-    int **pipes_ptow = malloc(sizeof(int *) * nb_enfants);
+    // int **pipes_ptow = malloc(sizeof(int *) * nb_enfants);
+    int pipes_ptow[nb_enfants][2];
     int pipe_wtop[2];
     int pipe_wtoc[2];
 
@@ -246,7 +281,7 @@ int main(int argc, char const *argv[]) {
     int worker_created = 0;
     while((pid_client == getpid()) && (worker_created < nb_enfants)){
         worker_id = worker_created;
-        pipes_ptow[worker_id] = malloc(sizeof(int)*2);
+        // pipes_ptow[worker_id] = malloc(sizeof(int)*2);
         pipe(pipes_ptow[worker_id]);
         worker_created++;
         fork();
@@ -260,37 +295,80 @@ int main(int argc, char const *argv[]) {
     init_p_or_c(pid_client, &pid_collecteur);
 
     if(pid_producteur == getpid()){
-        //Do producteur stuff
-        //Fermer les pipes_ptow en lecteur [0]
-        //printf("Producteur OK\n");
 
-        FILE *file = get_file("extra_mini_lorem.txt");
+        //close(pipe_wtop[0]);
+        close(pipe_wtop[1]);
+        close(pipe_wtoc[0]);
+        close(pipe_wtoc[1]);
+
+        for (int i = 0; i < nb_enfants; i++) {
+            close(pipes_ptow[i][0]);
+            //close(pipes_ptow[i][1]);
+        }
+
+        FILE *file = get_file("data/text.txt");
 
         send_data_to_workers(file, pipes_ptow, nb_enfants, nb_lg, line_size);
+
+        int worker_id_requesting;
+        // printf("%ld\n", read(pipe_wtop[0], &worker_id_requesting, sizeof(int)));
+
+        // while(read(pipe_wtop[0], &worker_id_requesting, sizeof(int)) > 0){
+        //     printf("TEST\n");
+        //     printf("WORKER REQUEST  => %d\n", worker_id_requesting);
+        // }
+        printf("END producteur\n");
 
     }
 
     if(pid_collecteur == getpid()){
 
+        close(pipe_wtop[0]);
+        close(pipe_wtop[1]);
+        //close(pipe_wtoc[0]);
+        close(pipe_wtoc[1]);
+
+        for (int i = 0; i < nb_enfants; i++) {
+            close(pipes_ptow[i][0]);
+            close(pipes_ptow[i][1]);
+        }
+
         element_array ea_count = init_element_array();
 
         element e;
-        for (size_t i = 0; i < 29; i++) {
-            read(pipe_wtoc[0], &e, sizeof(e));
+
+        while (read(pipe_wtoc[0], &e, sizeof(e)) > 0) {
             merge_element_count(&ea_count, e);
         }
+
+        display_element_array(ea_count);
+
+        free_element_array(&ea_count);
     }
 
+
     if(worker_id >= 0){
+        close(pipe_wtop[0]);
+        //close(pipe_wtop[1]);
+        close(pipe_wtoc[0]);
+        //close(pipe_wtoc[1]);
+
+        for (int i = 0; i < nb_enfants; i++) {
+            if(i != worker_id){
+                close(pipes_ptow[i][0]);
+            }
+            close(pipes_ptow[i][1]);
+        }
+
         char data[line_size * nb_lg];
-        read(pipes_ptow[worker_id][0], data, sizeof(data));
 
-        //printf("%s\n", data);
+        while (read(pipes_ptow[worker_id][0], data, sizeof(data)) > 0) {
+            printf("test\n");
+            send_count_data_wtoc(char_count(data), pipe_wtoc);
+            write(pipe_wtop[1], &worker_id, sizeof(int));
+        }
 
-        element_array element_cout = char_count(data);
-        //display_element_array(element_cout);
-
-        send_count_data_wtoc(element_cout, pipe_wtoc);
+        close(pipe_wtoc[1]);
 
         // sprintf(data, "OUI");
         // write(pipe_wtoc[1], data, sizeof(data));
@@ -298,6 +376,17 @@ int main(int argc, char const *argv[]) {
 
 
     if(pid_client == getpid()){
+
+        close(pipe_wtop[0]);
+        close(pipe_wtop[1]);
+        close(pipe_wtoc[0]);
+        close(pipe_wtoc[1]);
+
+        for (int i = 0; i < nb_enfants; i++) {
+            close(pipes_ptow[i][0]);
+            close(pipes_ptow[i][1]);
+        }
+
         wait(&status);
         wait(&status);
         wait(&status);
