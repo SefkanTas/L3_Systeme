@@ -260,8 +260,10 @@ void display_element_array(element_array ea){
 int main(int argc, char const *argv[]) {
 
     int nb_enfants = 2;
-    int nb_lg = 5;
+    int nb_lg = 7;
     int line_size = 1024;
+    char *files_list[] = {"data/text.txt", "data/extra_mini_lorem.txt"};
+    int nb_files = 2;
 
     int worker_id;
     int pid_producteur = -1;
@@ -306,17 +308,96 @@ int main(int argc, char const *argv[]) {
             //close(pipes_ptow[i][1]);
         }
 
-        FILE *file = get_file("data/text.txt");
+        // FILE *file = get_file("data/text.txt");
 
-        send_data_to_workers(file, pipes_ptow, nb_enfants, nb_lg, line_size);
+
+/*************************************************** ICI ***************************************************/
+
+        // int file_index = 0;
+        // int old_file_index = -1;
+        // FILE *file;
+        //
+        // char *block;
+        // int i = 0;
+        // while (i<nb_enfants && file_index < nb_files) {
+        //     if(old_file_index != file_index){
+        //         printf("changement de fichier\n");
+        //         file = get_file(files_list[file_index]);
+        //         old_file_index = file_index;
+        //     }
+        //     block = get_data_block(file, nb_lg, line_size);
+        //     if(block[0] == '\0'){
+        //         file_index++;
+        //     }
+        //     else{
+        //         write(pipes_ptow[i][1], block, sizeof(char) * strlen(block) + 1);
+        //     }
+        //     printf("file index %d  ---  %d : \n", file_index, i);
+        //     i++;
+        // }
+
+
+        int file_index = 0;
+        int old_file_index = -1;
+        int remaining_lines = nb_lg;
+        int i = 0;
+
+        FILE *file;
+
+
+        int j = 0;
+        char *data_block = malloc(sizeof(char) * line_size * nb_lg);
+        while(j < nb_enfants){
+            i = 0;
+            remaining_lines = nb_lg;
+            char data_line[line_size];
+            while(i < remaining_lines && file_index < nb_files){
+                if(old_file_index != file_index){
+                    file = get_file(files_list[file_index]);
+                    old_file_index = file_index;
+                }
+                while (i < remaining_lines && fgets(data_line, line_size, file)) {
+                    strcat(data_block, data_line);
+                    i++;
+                }
+                if(i < remaining_lines){
+                    file_index++;
+                    remaining_lines -= i;
+                    i = 0;
+                }
+            }
+            write(pipes_ptow[j][1], data_block, sizeof(char) * strlen(data_block) + 1);
+            j++;
+        }
+        free(data_block);
+
+
+        for (int i = 0; i < nb_enfants; i++) {
+            close(pipes_ptow[i][1]);
+        }
+
+        //printf("%s\n", data_block);
+
+/*************************************************** ICI****************** *********************************/
+
+
+        //send_data_to_workers(file, pipes_ptow, nb_enfants, nb_lg, line_size);
 
         int worker_id_requesting;
-        // printf("%ld\n", read(pipe_wtop[0], &worker_id_requesting, sizeof(int)));
 
         // while(read(pipe_wtop[0], &worker_id_requesting, sizeof(int)) > 0){
         //     printf("TEST\n");
         //     printf("WORKER REQUEST  => %d\n", worker_id_requesting);
+        //     printf("in of loop\n");
         // }
+
+        int read_res;
+        //do{
+        read_res = read(pipe_wtop[0], &worker_id_requesting, sizeof(int));
+            read_res = read(pipe_wtop[0], &worker_id_requesting, sizeof(int));
+        //}while(read_res > 0);
+
+        close(pipe_wtop[0]);
         printf("END producteur\n");
 
     }
@@ -363,12 +444,13 @@ int main(int argc, char const *argv[]) {
         char data[line_size * nb_lg];
 
         while (read(pipes_ptow[worker_id][0], data, sizeof(data)) > 0) {
-            printf("test\n");
             send_count_data_wtoc(char_count(data), pipe_wtoc);
             write(pipe_wtop[1], &worker_id, sizeof(int));
+            printf("end worker\n");
         }
 
         close(pipe_wtoc[1]);
+        close(pipe_wtop[1]);
 
         // sprintf(data, "OUI");
         // write(pipe_wtoc[1], data, sizeof(data));

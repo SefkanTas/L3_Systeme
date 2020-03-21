@@ -127,15 +127,25 @@ unsigned int count_char(char *data){
     return count;
 }
 
-int main(int argc, char const *argv[]) {
-    // char *c = "1234\n5";
-    // unsigned int count = count_char(c);
-    //
-    // printf("%d\n", count);
+FILE * get_file(char *path){
+    FILE *file = fopen(path, "r");
+    if (file == NULL){
+        printf("Erreur de fichier\n");
+        exit(2);
+    }
+    return file;
+}
 
-    char *a = "salut";
-    char b[] = "salut";
-    printf("a = %ld\n", strlen(a));
-    printf("b = %ld\n", strlen(b));
-    return 0;
+int main(int argc, char const *argv[]) {
+    FILE *file = get_file("../data/extra_mini_lorem.txt");
+    char data[10000];
+    char data2[10000];
+    if(1 == 1){
+        fgets(data, 1024, file);
+        printf("%s\n", data);
+    }
+    file = get_file("../data/extra_mini_lorem.txt");
+
+    fgets(data2, 1024, file);
+    printf("%s\n", data2);
 }
