@@ -153,10 +153,15 @@ typedef struct FileManager{
     int nb_files;
     int index;
     int last_used_index;
+    int is_done;
 } FileManager;
 
-void fm_update_index(FileManager *fm){
-    if(fm->last_used_index != fm->index){
+void fm_update_file(FileManager *fm){
+    if(fm->index >= fm->nb_files){
+        fm->is_done = 1;
+        return;
+    }
+    if((fm->last_used_index != fm->index)){
         fm->file = get_file(fm->files_path[fm->index]);
         fm->last_used_index = fm->index;
     }
@@ -175,8 +180,8 @@ void get_data_block(FileManager *fm, char *data_block, int nb_lg, int line_size)
     int i = 0;
     int remaining_lines = nb_lg;
     char data_line[line_size];
-    while(i < remaining_lines && fm->index < fm->nb_files){
-        fm_update_index(fm);
+    fm_update_file(fm);
+    while(i < remaining_lines && !fm->is_done){
         while (i < remaining_lines && fgets(data_line, line_size, fm->file)) {
             strcat(data_block, data_line);
             i++;
@@ -186,6 +191,7 @@ void get_data_block(FileManager *fm, char *data_block, int nb_lg, int line_size)
             remaining_lines -= i;
             i = 0;
         }
+        fm_update_file(fm);
     }
 }
 
@@ -234,8 +240,8 @@ void display_element_array(element_array ea){
 
 int main(int argc, char const *argv[]) {
 
-    int nb_enfants = 2;
-    int nb_lg = 2;
+    int nb_enfants = 3;
+    int nb_lg = 12;
     int line_size = 1024;
     char *files_list[] = {"data/text.txt", "data/extra_mini_lorem.txt"};
     int nb_files = 2;
@@ -246,7 +252,6 @@ int main(int argc, char const *argv[]) {
     int pid_client = getpid();
     int status;
 
-    // int **pipes_ptow = malloc(sizeof(int *) * nb_enfants);
     int pipes_ptow[nb_enfants][2];
     int pipe_wtop[2];
     int pipe_wtoc[2];
@@ -254,11 +259,9 @@ int main(int argc, char const *argv[]) {
     pipe(pipe_wtop);
     pipe(pipe_wtoc);
 
-    //creation worker
     int worker_created = 0;
     while((pid_client == getpid()) && (worker_created < nb_enfants)){
         worker_id = worker_created;
-        // pipes_ptow[worker_id] = malloc(sizeof(int)*2);
         pipe(pipes_ptow[worker_id]);
         worker_created++;
         fork();
@@ -273,25 +276,21 @@ int main(int argc, char const *argv[]) {
 
     if(pid_producteur == getpid()){
 
-        //close(pipe_wtop[0]);
         close(pipe_wtop[1]);
         close(pipe_wtoc[0]);
         close(pipe_wtoc[1]);
 
         for (int i = 0; i < nb_enfants; i++) {
             close(pipes_ptow[i][0]);
-            //close(pipes_ptow[i][1]);
         }
-
-//////////
 
         FileManager fm;
         fm.index = 0;
         fm.last_used_index = -1;
         fm.files_path = files_list;
         fm.nb_files = 2;
+        fm.is_done = 0;
 
-//////////
 
         int file_index = 0;
         int old_file_index = -1;
@@ -301,27 +300,23 @@ int main(int argc, char const *argv[]) {
         FILE *file;
 
         int j = 0;
-        char *data_block = malloc(sizeof(char) * line_size * nb_lg);
         while(j < nb_enfants){
+            char *data_block = malloc(sizeof(char) * line_size * nb_lg);
             get_data_block(&fm, data_block, nb_lg, line_size);
             write(pipes_ptow[j][1], data_block, sizeof(char) * strlen(data_block) + 1);
             j++;
+            free(data_block);
         }
-        //free(data_block);
 
         int worker_id_requesting;
 
-        // while(read(pipe_wtop[0], &worker_id_requesting, sizeof(int)) > 0){
-        //     printf("TEST\n");
-        //     printf("WORKER REQUEST  => %d\n", worker_id_requesting);
-        //     printf("in of loop\n");
-        // }
-
-        int read_res;
-        //do{
-        read_res = read(pipe_wtop[0], &worker_id_requesting, sizeof(int));
-            read_res = read(pipe_wtop[0], &worker_id_requesting, sizeof(int));
-        //}while(read_res > 0);
+        while(!fm.is_done){
+            char *data_block = malloc(sizeof(char) * line_size * nb_lg);
+            read(pipe_wtop[0], &worker_id_requesting, sizeof(int));
+            get_data_block(&fm, data_block, nb_lg, line_size);
+            write(pipes_ptow[worker_id_requesting][1], data_block, sizeof(char) * strlen(data_block) + 1);
+            free(data_block);
+        }
 
         close(pipe_wtop[0]);
         printf("END producteur\n");
@@ -332,7 +327,6 @@ int main(int argc, char const *argv[]) {
 
         close(pipe_wtop[0]);
         close(pipe_wtop[1]);
-        //close(pipe_wtoc[0]);
         close(pipe_wtoc[1]);
 
         for (int i = 0; i < nb_enfants; i++) {
@@ -356,9 +350,7 @@ int main(int argc, char const *argv[]) {
 
     if(worker_id >= 0){
         close(pipe_wtop[0]);
-        //close(pipe_wtop[1]);
         close(pipe_wtoc[0]);
-        //close(pipe_wtoc[1]);
 
         for (int i = 0; i < nb_enfants; i++) {
             if(i != worker_id){
@@ -372,15 +364,11 @@ int main(int argc, char const *argv[]) {
         while (read(pipes_ptow[worker_id][0], data, sizeof(data)) > 0) {
             send_count_data_wtoc(char_count(data), pipe_wtoc);
             write(pipe_wtop[1], &worker_id, sizeof(int));
-            //write(pipe_wtop[1], &worke)
             printf("end worker\n");
         }
 
         close(pipe_wtoc[1]);
         close(pipe_wtop[1]);
-
-        // sprintf(data, "OUI");
-        // write(pipe_wtoc[1], data, sizeof(data));
     }
 
 
@@ -396,10 +384,9 @@ int main(int argc, char const *argv[]) {
             close(pipes_ptow[i][1]);
         }
 
-        wait(&status);
-        wait(&status);
-        wait(&status);
-        wait(&status);
+        for(int i = 0; i < nb_enfants + 2; i++){
+            wait(&status);
+        }
 
         printf("\n----- CLIENT : fermeture du programme -----\n");
     }

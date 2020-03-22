@@ -1,5 +1,234 @@
-end worker
-end worker
+1 Ceci est la premiere ligne
+2 Ceci est la seconde ligne
+
+1 Ceci est la premiere ligne
+2 Ceci est la seconde ligne
+3 Voici la troisieme ligne
+4 d'accord d'accord
+
+WORKER REQUEST  => 0
+1 Ceci est la premiere ligne
+2 Ceci est la seconde ligne
+3 Voici la troisieme ligne
+4 d'accord d'accord
+5 Je n'ai plus d'insipiration
+6 Il est treize heure
+
+		FILE INDEX : 0
+WORKER REQUEST  => 1
+1 Ceci est la premiere ligne
+2 Ceci est la seconde ligne
+3 Voici la troisieme ligne
+4 d'accord d'accord
+5 Je n'ai plus d'insipiration
+6 Il est treize heure
+7 Loremp ipsum
+8 Nestle pure life
+
+		FILE INDEX : 0
+WORKER REQUEST  => 0
+1 Ceci est la premiere ligne
+2 Ceci est la seconde ligne
+3 Voici la troisieme ligne
+4 d'accord d'accord
+5 Je n'ai plus d'insipiration
+6 Il est treize heure
+7 Loremp ipsum
+8 Nestle pure life
+9 c'est pas faux
+10 Et voici la dixieme ligne
+
+		FILE INDEX : 0
+WORKER REQUEST  => 1
+1 Ceci est la premiere ligne
+2 Ceci est la seconde ligne
+3 Voici la troisieme ligne
+4 d'accord d'accord
+5 Je n'ai plus d'insipiration
+6 Il est treize heure
+7 Loremp ipsum
+8 Nestle pure life
+9 c'est pas faux
+10 Et voici la dixieme ligne
+1LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLoremi
+2sefkan
+
+		FILE INDEX : 1
+WORKER REQUEST  => 0
+1 Ceci est la premiere ligne
+2 Ceci est la seconde ligne
+3 Voici la troisieme ligne
+4 d'accord d'accord
+5 Je n'ai plus d'insipiration
+6 Il est treize heure
+7 Loremp ipsum
+8 Nestle pure life
+9 c'est pas faux
+10 Et voici la dixieme ligne
+1LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLoremi
+2sefkan
+3LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+4sefkan
+
+		FILE INDEX : 1
+WORKER REQUEST  => 1
+1 Ceci est la premiere ligne
+2 Ceci est la seconde ligne
+3 Voici la troisieme ligne
+4 d'accord d'accord
+5 Je n'ai plus d'insipiration
+6 Il est treize heure
+7 Loremp ipsum
+8 Nestle pure life
+9 c'est pas faux
+10 Et voici la dixieme ligne
+1LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLoremi
+2sefkan
+3LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+4sefkan
+5LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+6sefkan
+
+		FILE INDEX : 1
+WORKER REQUEST  => 0
+1 Ceci est la premiere ligne
+2 Ceci est la seconde ligne
+3 Voici la troisieme ligne
+4 d'accord d'accord
+5 Je n'ai plus d'insipiration
+6 Il est treize heure
+7 Loremp ipsum
+8 Nestle pure life
+9 c'est pas faux
+10 Et voici la dixieme ligne
+1LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLoremi
+2sefkan
+3LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+4sefkan
+5LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+6sefkan
+7LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+8sefkan
+
+		FILE INDEX : 1
+WORKER REQUEST  => 1
+1 Ceci est la premiere ligne
+2 Ceci est la seconde ligne
+3 Voici la troisieme ligne
+4 d'accord d'accord
+5 Je n'ai plus d'insipiration
+6 Il est treize heure
+7 Loremp ipsum
+8 Nestle pure life
+9 c'est pas faux
+10 Et voici la dixieme ligne
+1LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLoremi
+2sefkan
+3LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+4sefkan
+5LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+6sefkan
+7LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+8sefkan
+9LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+10sefkan
+
+		FILE INDEX : 1
+WORKER REQUEST  => 0
+1 Ceci est la premiere ligne
+2 Ceci est la seconde ligne
+3 Voici la troisieme ligne
+4 d'accord d'accord
+5 Je n'ai plus d'insipiration
+6 Il est treize heure
+7 Loremp ipsum
+8 Nestle pure life
+9 c'est pas faux
+10 Et voici la dixieme ligne
+1LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLoremi
+2sefkan
+3LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+4sefkan
+5LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+6sefkan
+7LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+8sefkan
+9LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+10sefkan
+11LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+12sefkan
+
+		FILE INDEX : 1
+WORKER REQUEST  => 1
+1 Ceci est la premiere ligne
+2 Ceci est la seconde ligne
+3 Voici la troisieme ligne
+4 d'accord d'accord
+5 Je n'ai plus d'insipiration
+6 Il est treize heure
+7 Loremp ipsum
+8 Nestle pure life
+9 c'est pas faux
+10 Et voici la dixieme ligne
+1LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLoremi
+2sefkan
+3LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+4sefkan
+5LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+6sefkan
+7LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+8sefkan
+9LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+10sefkan
+11LoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLorLoremLoremLoremLoremLor
+12sefkan
+
+		FILE INDEX : 2
 END producteur
+end worker
+end worker
+end worker
+end worker
+end worker
+end worker
+end worker
+end worker
+end worker
+end worker
+end worker
+end worker
+1 => 36
+C => 131
+E => 992
+I => 250
+S => 138
+T => 90
+L => 943
+A => 128
+P => 67
+R => 915
+M => 704
+G => 43
+N => 121
+2 => 21
+O => 893
+D => 74
+3 => 17
+V => 19
+4 => 17
+' => 50
+5 => 15
+J => 10
+U => 46
+6 => 15
+Z => 10
+H => 10
+7 => 13
+8 => 13
+F => 44
+9 => 11
+X => 16
+0 => 11
+K => 27
 
 ----- CLIENT : fermeture du programme -----
