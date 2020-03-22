@@ -5,7 +5,6 @@
 #include <string.h>
 #include <ctype.h>
 
-
 typedef struct element{
     char key[50];
     unsigned int count;
@@ -148,6 +147,21 @@ FILE * get_file(char *path){
     return file;
 }
 
+typedef struct FileManager{
+    FILE *file;
+    char **files_path;
+    int nb_files;
+    int index;
+    int last_used_index;
+} FileManager;
+
+void fm_update_index(FileManager *fm){
+    if(fm->last_used_index != fm->index){
+        fm->file = get_file(fm->files_path[fm->index]);
+        fm->last_used_index = fm->index;
+    }
+}
+
 /**
 * Return un bloc de donnée selon la taille souhaitée, à partir d'un fichier
 *
@@ -156,63 +170,24 @@ FILE * get_file(char *path){
 *
 * @return char * : bloc de donnée
 **/
-char * get_data_block(FILE *file, int nb_lg, int line_size){
+
+void get_data_block(FileManager *fm, char *data_block, int nb_lg, int line_size){
+    int i = 0;
+    int remaining_lines = nb_lg;
     char data_line[line_size];
-    char *data_block = malloc(sizeof(char) * line_size * nb_lg);
-
-    int i = 0;
-    while (i < nb_lg && fgets(data_line, line_size, file)) {
-        strcat(data_block, data_line);
-        i++;
-    }
-
-    return data_block;
-}
-
-// void send_data_to_worker(FILE *file, int pipes_ptow[], int nb_lg, int line_size){
-//     char *block;
-//     int i = 0;
-//     int file_has_data = 1;
-//
-//     block = get_data_block(file, nb_lg, line_size);
-//     write(pipes_ptow[1], block, sizeof(char) * strlen(block) + 1);
-//
-//
-//     while (i<nb_enfants && file_has_data) {
-//         block = get_data_block(file, nb_lg, line_size);
-//         if(block[0] == '\0'){
-//             /* Si le fichier est vide */
-//             file_has_data = 0;
-//             write(pipes_ptow[i][1], "DONE", sizeof(char) * strlen("DONE") + 1);
-//         }
-//         else{
-//             write(pipes_ptow[i][1], block, sizeof(char) * strlen(block) + 1);
-//         }
-//         i++;
-//     }
-// }
-
-/**
-* Envoie la première vagues de données vers les workers
-*/
-void send_data_to_workers(FILE *file, int pipes_ptow[][2], int nb_enfants, int nb_lg, int line_size){
-    char *block;
-    int i = 0;
-    int file_has_data = 1;
-    while (i<nb_enfants && file_has_data) {
-        block = get_data_block(file, nb_lg, line_size);
-        if(block[0] == '\0'){
-            /* Si le fichier est vide */
-            file_has_data = 0;
-            write(pipes_ptow[i][1], "DONE", sizeof(char) * strlen("DONE") + 1);
+    while(i < remaining_lines && fm->index < fm->nb_files){
+        fm_update_index(fm);
+        while (i < remaining_lines && fgets(data_line, line_size, fm->file)) {
+            strcat(data_block, data_line);
+            i++;
         }
-        else{
-            write(pipes_ptow[i][1], block, sizeof(char) * strlen(block) + 1);
+        if(i < remaining_lines){
+            fm->index++;
+            remaining_lines -= i;
+            i = 0;
         }
-        i++;
     }
 }
-
 
 /**
 * Compte le nombre d'occurrences d'un caractère dans une chaîne de caractère.
@@ -260,7 +235,7 @@ void display_element_array(element_array ea){
 int main(int argc, char const *argv[]) {
 
     int nb_enfants = 2;
-    int nb_lg = 7;
+    int nb_lg = 2;
     int line_size = 1024;
     char *files_list[] = {"data/text.txt", "data/extra_mini_lorem.txt"};
     int nb_files = 2;
@@ -308,34 +283,15 @@ int main(int argc, char const *argv[]) {
             //close(pipes_ptow[i][1]);
         }
 
-        // FILE *file = get_file("data/text.txt");
+//////////
 
+        FileManager fm;
+        fm.index = 0;
+        fm.last_used_index = -1;
+        fm.files_path = files_list;
+        fm.nb_files = 2;
 
-/*************************************************** ICI ***************************************************/
-
-        // int file_index = 0;
-        // int old_file_index = -1;
-        // FILE *file;
-        //
-        // char *block;
-        // int i = 0;
-        // while (i<nb_enfants && file_index < nb_files) {
-        //     if(old_file_index != file_index){
-        //         printf("changement de fichier\n");
-        //         file = get_file(files_list[file_index]);
-        //         old_file_index = file_index;
-        //     }
-        //     block = get_data_block(file, nb_lg, line_size);
-        //     if(block[0] == '\0'){
-        //         file_index++;
-        //     }
-        //     else{
-        //         write(pipes_ptow[i][1], block, sizeof(char) * strlen(block) + 1);
-        //     }
-        //     printf("file index %d  ---  %d : \n", file_index, i);
-        //     i++;
-        // }
-
+//////////
 
         int file_index = 0;
         int old_file_index = -1;
@@ -344,44 +300,14 @@ int main(int argc, char const *argv[]) {
 
         FILE *file;
 
-
         int j = 0;
         char *data_block = malloc(sizeof(char) * line_size * nb_lg);
         while(j < nb_enfants){
-            i = 0;
-            remaining_lines = nb_lg;
-            char data_line[line_size];
-            while(i < remaining_lines && file_index < nb_files){
-                if(old_file_index != file_index){
-                    file = get_file(files_list[file_index]);
-                    old_file_index = file_index;
-                }
-                while (i < remaining_lines && fgets(data_line, line_size, file)) {
-                    strcat(data_block, data_line);
-                    i++;
-                }
-                if(i < remaining_lines){
-                    file_index++;
-                    remaining_lines -= i;
-                    i = 0;
-                }
-            }
+            get_data_block(&fm, data_block, nb_lg, line_size);
             write(pipes_ptow[j][1], data_block, sizeof(char) * strlen(data_block) + 1);
             j++;
         }
-        free(data_block);
-
-
-        for (int i = 0; i < nb_enfants; i++) {
-            close(pipes_ptow[i][1]);
-        }
-
-        //printf("%s\n", data_block);
-
-/*************************************************** ICI****************** *********************************/
-
-
-        //send_data_to_workers(file, pipes_ptow, nb_enfants, nb_lg, line_size);
+        //free(data_block);
 
         int worker_id_requesting;
 
@@ -446,6 +372,7 @@ int main(int argc, char const *argv[]) {
         while (read(pipes_ptow[worker_id][0], data, sizeof(data)) > 0) {
             send_count_data_wtoc(char_count(data), pipe_wtoc);
             write(pipe_wtop[1], &worker_id, sizeof(int));
+            //write(pipe_wtop[1], &worke)
             printf("end worker\n");
         }
 

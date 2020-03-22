@@ -136,16 +136,33 @@ FILE * get_file(char *path){
     return file;
 }
 
-int main(int argc, char const *argv[]) {
-    FILE *file = get_file("../data/extra_mini_lorem.txt");
-    char data[10000];
-    char data2[10000];
-    if(1 == 1){
-        fgets(data, 1024, file);
-        printf("%s\n", data);
-    }
-    file = get_file("../data/extra_mini_lorem.txt");
+typedef struct FileManager{
+    FILE *file;
+    char **files_path;
+    int nb_files;
+    int index;
+    int last_used_index;
+} FileManager;
 
-    fgets(data2, 1024, file);
-    printf("%s\n", data2);
+void fm_update_index(FileManager *fm){
+    if(fm->last_used_index != fm->index){
+        fm->file = get_file(fm->files_path[fm->index]);
+        fm->last_used_index = fm->index;
+    }
+}
+
+
+int main(int argc, char const *argv[]) {
+    //FILE *file = get_file("../data/extra_mini_lorem.txt");
+
+    char *files_path[] = {"../data/text.txt", "../data/extra_mini_lorem.txt"};
+    printf("%s\n", files_path[0]);
+    int nb_files = 2;
+
+    FileManager fm;
+    fm.files_path = files_path;
+    files_path[0] = "a";
+    printf("%s\n", fm.files_path[0]);
+
+    return 0;
 }
