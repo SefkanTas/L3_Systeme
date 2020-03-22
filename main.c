@@ -6,7 +6,7 @@
 #include <ctype.h>
 
 typedef struct element{
-    char key[50];
+    char key[51];
     unsigned int count;
 } element;
 
@@ -203,8 +203,8 @@ void get_data_block(FileManager *fm, char *data_block, int nb_lg, int line_size)
 * @return element_array : element_array avec le nombre d'occurrences de chaque caractère
 **/
 element_array char_count(char *data){
-    int i = 0;
     element_array ea = init_element_array();
+    int i = 0;
     while (data[i] != '\0') {
         if(!is_separator(data[i])){
             char string[] = {toupper(data[i])};
@@ -216,13 +216,43 @@ element_array char_count(char *data){
     return ea;
 }
 
+element_array word_count(char *data){
+    // char separator_list[] = {
+    //     '\n', '\t', ' ', ',', ';',
+    //     '!', '?', '.', ':', '\r'
+    // };
+
+    char *separators = " \n\t,;!?.:\r";
+
+    element_array ea = init_element_array();
+
+    char *data_tok = strtok(data, separators);
+    int i;
+    while (data_tok != NULL) {
+        i = 0;
+        while (data_tok[i] != '\0' && i < 50) {
+            data_tok[i] = toupper(data_tok[i]);
+            i++;
+        }
+        if(i == 50){
+            strncpy(data_tok, data_tok, i);
+            data_tok[i] = '\0';
+        }
+        increment_element_count(&ea, data_tok);
+        data_tok = strtok(NULL, separators);
+    }
+
+    return ea;
+}
+
+
 /**
 * send each element of an element_array array from a work to the collecteur
 *
 * @param element_array ea : the element_array that contains our data
 * @int *pipe_wtoc : pipe to communicate from worker to collecteur
 **/
-void send_count_data_wtoc(element_array ea, int *pipe_wtoc){
+void send_data_wtoc(element_array ea, int *pipe_wtoc){
     for(int i = 0; i < ea.len; i++){
         write(pipe_wtoc[1], &ea.array[i], sizeof(element));
     }
@@ -305,7 +335,7 @@ int main(int argc, char const *argv[]) {
             get_data_block(&fm, data_block, nb_lg, line_size);
             write(pipes_ptow[j][1], data_block, sizeof(char) * strlen(data_block) + 1);
             j++;
-            free(data_block);
+            //free(data_block);
         }
 
         int worker_id_requesting;
@@ -315,7 +345,7 @@ int main(int argc, char const *argv[]) {
             read(pipe_wtop[0], &worker_id_requesting, sizeof(int));
             get_data_block(&fm, data_block, nb_lg, line_size);
             write(pipes_ptow[worker_id_requesting][1], data_block, sizeof(char) * strlen(data_block) + 1);
-            free(data_block);
+            //free(data_block);
         }
 
         close(pipe_wtop[0]);
@@ -362,7 +392,7 @@ int main(int argc, char const *argv[]) {
         char data[line_size * nb_lg];
 
         while (read(pipes_ptow[worker_id][0], data, sizeof(data)) > 0) {
-            send_count_data_wtoc(char_count(data), pipe_wtoc);
+            send_data_wtoc(word_count(data), pipe_wtoc);
             write(pipe_wtop[1], &worker_id, sizeof(int));
             printf("end worker\n");
         }
