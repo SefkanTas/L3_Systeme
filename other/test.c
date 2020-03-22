@@ -155,6 +155,10 @@ void fm_update_index(FileManager *fm){
 int main(int argc, char const *argv[]) {
     //FILE *file = get_file("../data/extra_mini_lorem.txt");
 
+    printf("%s\n", argv[1]);
+
+    return 0;
+
     char *files_path[] = {"../data/text.txt", "../data/extra_mini_lorem.txt"};
     printf("%s\n", files_path[0]);
     int nb_files = 2;

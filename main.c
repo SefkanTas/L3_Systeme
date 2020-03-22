@@ -206,7 +206,7 @@ element_array char_count(char *data){
     element_array ea = init_element_array();
     int i = 0;
     while (data[i] != '\0') {
-        if(!is_separator(data[i])){
+        if(!ispunct(data[i]) && !isspace(data[i])){
             char string[] = {toupper(data[i])};
             increment_element_count(&ea, string);
         }
@@ -245,6 +245,36 @@ element_array word_count(char *data){
     return ea;
 }
 
+element_array separator_count(char *data){
+    element_array ea = init_element_array();
+    int i = 0;
+    while (data[i] != '\0') {
+        if(ispunct(data[i]) || isspace(data[i])){
+            if(data[i] == ' '){
+                increment_element_count(&ea, "space");
+            }
+            else if(data[i] == '\r'){
+                increment_element_count(&ea, "\\r");
+            }
+            else if(data[i] == '\n'){
+                increment_element_count(&ea, "\\n");
+            }
+            else if(data[i] == '\t'){
+                increment_element_count(&ea, "\\t");
+            }
+            else{
+                char string[] = {data[i]};
+                increment_element_count(&ea, string);
+            }
+        }
+        i++;
+    }
+
+    return ea;
+}
+
+
+
 
 /**
 * send each element of an element_array array from a work to the collecteur
@@ -270,8 +300,8 @@ void display_element_array(element_array ea){
 
 int main(int argc, char const *argv[]) {
 
-    int nb_enfants = 3;
-    int nb_lg = 12;
+    int nb_enfants = 2;
+    int nb_lg = 2;
     int line_size = 1024;
     char *files_list[] = {"data/text.txt", "data/extra_mini_lorem.txt"};
     int nb_files = 2;
@@ -392,10 +422,12 @@ int main(int argc, char const *argv[]) {
         char data[line_size * nb_lg];
 
         while (read(pipes_ptow[worker_id][0], data, sizeof(data)) > 0) {
-            send_data_wtoc(word_count(data), pipe_wtoc);
+            printf("MON WORKER_ID %d\n", worker_id);
+
+            send_data_wtoc(separator_count(data), pipe_wtoc);
             write(pipe_wtop[1], &worker_id, sizeof(int));
-            printf("end worker\n");
         }
+        printf("end worker : %d\n", worker_id);
 
         close(pipe_wtoc[1]);
         close(pipe_wtop[1]);
