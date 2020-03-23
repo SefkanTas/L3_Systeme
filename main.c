@@ -368,7 +368,7 @@ int main(int argc, char const *argv[]) {
     nb_enfants = atoi(argv[2]);
 
     if(nb_enfants == 0){
-        nb_enfants = sysconf(_SC_NPROCESSORS_ONLN);
+        nb_enfants = sysconf(_SC_NPROCESSORS_ONLN) - 2;
     }
     if(nb_enfants < NB_ENFANT_MIN){
         nb_enfants = NB_ENFANT_MIN;
