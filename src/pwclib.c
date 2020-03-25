@@ -351,3 +351,13 @@ int is_number(const char *str){
     }
     return is_number;
 }
+
+/**
+* Envoie un signal de démarrage au producteur.
+*
+* @param int *pipe_cltop : Pipe du client vers le producteur.
+**/
+void launch_producteur(int *pipe_cltop){
+    int signal = 1;
+    write(pipe_cltop[1], &signal, sizeof(int));
+}

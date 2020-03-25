@@ -1,13 +1,13 @@
 #include <ctype.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <sys/wait.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-#include "headers/element.h"
-#include "headers/file_manager.h"
-#include "headers/pwclib.h"
+#include "../headers/element.h"
+#include "../headers/file_manager.h"
+#include "../headers/pwclib.h"
 
 int main(int argc, char const *argv[]) {
 
@@ -25,12 +25,14 @@ int main(int argc, char const *argv[]) {
     int pid_collecteur = -1;
     int pid_client = getpid();
 
-    int pipes_ptow[nb_enfants][2];
-    int pipe_wtop[2];
-    int pipe_wtoc[2];
+    int pipes_ptow[nb_enfants][2];  /*pipes producteur to worker*/
+    int pipe_wtop[2];               /*pipe workers to producteur*/
+    int pipe_wtoc[2];               /*pipe workers to collecteur*/
+    int pipe_cltop[2];              /*pipe client to prodcteur*/
 
     pipe(pipe_wtop);
     pipe(pipe_wtoc);
+    pipe(pipe_cltop);
 
     /*Création des workers*/
     int worker_created = 0;
@@ -54,9 +56,14 @@ int main(int argc, char const *argv[]) {
         close(pipe_wtop[1]);
         close(pipe_wtoc[0]);
         close(pipe_wtoc[1]);
+        close(pipe_cltop[1]);
         for (int i = 0; i < nb_enfants; i++) {
             close(pipes_ptow[i][0]);
         }
+
+        /*Attend le signal du client pour démarrer.*/
+        read(pipe_cltop[0], NULL, sizeof(int));
+        close(pipe_cltop[0]);
 
         FileManager fm;
         fm.nb_files = argc - 4;
@@ -96,33 +103,12 @@ int main(int argc, char const *argv[]) {
     }
 
 
-    /* Code du collecteur */
-    if(pid_collecteur == getpid()){
-        close(pipe_wtop[0]);
-        close(pipe_wtop[1]);
-        close(pipe_wtoc[1]);
-        for (int i = 0; i < nb_enfants; i++) {
-            close(pipes_ptow[i][0]);
-            close(pipes_ptow[i][1]);
-        }
-
-        ElementArray ea_count = init_element_array();
-        Element e;
-
-        /*Reçoit la donnée des workers puis les fusionnent*/
-        while (read(pipe_wtoc[0], &e, sizeof(e)) > 0) {
-            merge_element_count(&ea_count, e);
-        }
-
-        display_element_array(ea_count);
-        free_element_array(&ea_count);
-    }
-
-
     /* Code des workers */
     if(worker_id >= 0){
         close(pipe_wtop[0]);
         close(pipe_wtoc[0]);
+        close(pipe_cltop[0]);
+        close(pipe_cltop[1]);
         for (int i = 0; i < nb_enfants; i++) {
             if(i != worker_id){
                 close(pipes_ptow[i][0]);
@@ -145,28 +131,52 @@ int main(int argc, char const *argv[]) {
             write(pipe_wtop[1], &worker_id, sizeof(int));
         }
 
-        printf("END worker : %d\n", worker_id);
-
         close(pipe_wtoc[1]);
         close(pipe_wtop[1]);
     }
 
+
+    /* Code du collecteur */
+    if(pid_collecteur == getpid()){
+        close(pipe_wtop[0]);
+        close(pipe_wtop[1]);
+        close(pipe_wtoc[1]);
+        close(pipe_cltop[0]);
+        close(pipe_cltop[1]);
+        for (int i = 0; i < nb_enfants; i++) {
+            close(pipes_ptow[i][0]);
+            close(pipes_ptow[i][1]);
+        }
+
+        ElementArray ea_count = init_element_array();
+        Element e;
+
+        /*Reçoit la donnée des workers puis les fusionnent*/
+        while (read(pipe_wtoc[0], &e, sizeof(e)) > 0) {
+            merge_element_count(&ea_count, e);
+        }
+
+        display_element_array(ea_count);
+        free_element_array(&ea_count);
+    }
 
     if(pid_client == getpid()){
         close(pipe_wtop[0]);
         close(pipe_wtop[1]);
         close(pipe_wtoc[0]);
         close(pipe_wtoc[1]);
+        close(pipe_cltop[0]);
         for (int i = 0; i < nb_enfants; i++) {
             close(pipes_ptow[i][0]);
             close(pipes_ptow[i][1]);
         }
 
+        launch_producteur(pipe_cltop);
+        close(pipe_cltop[1]);
+
         for(int i = 0; i < nb_enfants + 2; i++){
             wait(NULL);
         }
-
-        printf("\n----- CLIENT : fermeture du programme -----\n");
     }
 
     return 0;

@@ -1,6 +1,9 @@
 #ifndef FILE_MANAGER_H
 #define FILE_MANAGER_H
 
+/**
+* FileManager
+**/
 typedef struct FileManager{
     FILE *file;
     char **files_path;

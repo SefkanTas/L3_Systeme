@@ -1,8 +1,8 @@
 pwc : bin/main.o bin/element.o bin/file_manager.o bin/pwclib.o
 	gcc -o pwc bin/main.o bin/element.o bin/file_manager.o bin/pwclib.o -Wall
 
-bin/main.o : main.c
-	gcc -o bin/main.o -c main.c -Wall
+bin/main.o : src/main.c
+	gcc -o bin/main.o -c src/main.c -Wall
 
 bin/element.o : src/element.c
 	gcc -o bin/element.o -c src/element.c -Wall

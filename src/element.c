@@ -6,8 +6,6 @@
 #include "../headers/element.h"
 
 /**
-* init_element_array
-*
 * Initialise un ElementArray.
 *
 * @return ElementArray : Un ElementArray initialisé.
@@ -22,8 +20,6 @@ ElementArray init_element_array(){
 }
 
 /**
-* init_element
-*
 * Initialise un nouvel Element
 *
 * @param char *key : la chaine de char pour la clé.
@@ -41,8 +37,6 @@ Element init_element(char *key, unsigned int count){
 
 
 /**
-* free_element_array
-*
 * Libère la mémoire d'un ElementArray
 *
 * @param ElementArray *ea : L'ElementArray dont la mémoire doit être libérée.
@@ -55,8 +49,6 @@ void free_element_array(ElementArray *ea){
 }
 
 /**
-* add_element
-*
 * Ajoute un Element dans un ElementArray.
 *
 * @param ElementArray *ea : L'ElementArray cible.
@@ -72,8 +64,6 @@ void add_element(ElementArray *ea, Element e){
 
 
 /**
-* get_element_index_by_key
-*
 * Retourne l'index d'un Element dans un ElementArray en fonction de sa clé.
 *
 * @param ElementArray ea : L'ElementArray cible.
@@ -94,8 +84,6 @@ int get_element_index_by_key(ElementArray ea, char *key){
 }
 
 /**
-* increment_element_count_by_n
-*
 * Incremente le compteur d'un Element de n.
 *
 * @param ElementArray *ea : ElementArray qui contient l'Element
@@ -125,8 +113,6 @@ void increment_element_count_by_n(ElementArray *ea, char *key, long n){
 
 
 /**
-* increment_element_count
-*
 * Incremente le compteur d'un Element de 1.
 *
 * @param ElementArray *ea : ElementArray qui contient l'Element
@@ -138,8 +124,6 @@ void increment_element_count(ElementArray *ea, char *key){
 }
 
 /**
-* merge_element_count
-*
 * Fusionne les compteurs d'un Element dans un ElementArray avec celui d'un autre
 *   Element qui a la même clé. Si la fusion n'est pas possible, l'Element
 *   extérieur est ajouté à l'ElementArray.
@@ -152,8 +136,6 @@ void merge_element_count(ElementArray *ea, Element e){
 }
 
 /**
-* display_element
-*
 * Affiche un Element.
 *
 * @param Element e : Element à afficher.
@@ -168,8 +150,6 @@ void display_element(Element e){
 }
 
 /**
-* display_element_array
-*
 * Affiche les Element d'un ElementArray.
 *
 * @param ElementArray ea : ElementArray dont les Element sont a afficher.

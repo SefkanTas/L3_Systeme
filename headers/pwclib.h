@@ -17,6 +17,7 @@ ElementArray separator_count(char *data);
 ElementArray get_count_by_type(char type, char *data);
 void send_data_wtoc(ElementArray ea, int *pipe_wtoc);
 int is_type_valid(const char *type);
-int is_number(const char *nb_enf);
+int is_number(const char *str);
+void launch_producteur(int *pipe_cltop);
 
 #endif
