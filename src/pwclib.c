@@ -4,12 +4,20 @@
 #include <string.h>
 #include <unistd.h>
 
-
 #include "../headers/element.h"
 #include "../headers/file_manager.h"
 #include "../headers/pwclib.h"
 
 
+/**
+* check_nb_params
+*
+* Vérifie si le nombre de paramètres est correcte, quitte le programme sinon.
+*
+* @param int nb_param : Nombre de paramètres
+* @param int nb_required : Nombre de paramètres requis
+* @param const char *name : Nom du programme pour l'affichage de l'erreur
+**/
 void check_nb_params(int nb_param, int nb_required, const char *name){
     if(nb_param < nb_required){
         printf("Nombre de parametre inccorecte.\n");
@@ -18,6 +26,15 @@ void check_nb_params(int nb_param, int nb_required, const char *name){
     }
 }
 
+
+/**
+* check_type_comptage
+*
+* Vérifie que le type de comptage spécifié par l'utilisateur est correcte,
+*   quitte le programme sinon.
+*
+* @param const char *param : Type de comptage entré par l'utilisateur
+**/
 void check_type_comptage(const char *param){
     if(!is_type_valid(param)){
         printf("Le type de comptage est invalide (c, w, s).\n");
@@ -25,6 +42,14 @@ void check_type_comptage(const char *param){
     }
 }
 
+/**
+* check_nb_enfants
+*
+* Vérifie que le nombre d'enfants spécifié par l'utilisateur est correcte,
+*   quitte le programme sinon.
+*
+* @param const char *param : Nombre d'enfants entré par l'utilisateur
+**/
 void check_nb_enfants(const char *param){
     if(!is_number(param)){
         printf("Le nombre d'enfants est invalide.\n");
@@ -32,6 +57,14 @@ void check_nb_enfants(const char *param){
     }
 }
 
+/**
+* check_nb_lg
+*
+* Vérifie que le nombre de lignes spécifié par l'utilisateur est correcte,
+*   quitte le programme sinon.
+*
+* @param const char *param : Nombre de lignes entré par l'utilisateur
+**/
 void check_nb_lg(const char *param){
     if(!is_number(param)){
         printf("Le nombre de lignes est invalide.\n");
@@ -39,6 +72,15 @@ void check_nb_lg(const char *param){
     }
 }
 
+/**
+* check_files
+*
+* Vérifie que les fichiers spécifié par l'utilisateur existent et sont
+*   accessible en écriture, quitte le programme sinon.
+*
+* @param int argc : nombre de paramètres du programme.
+* @param const char *argv[] : Paramètres du programme.
+**/
 void check_files(int argc, const char *argv[]){
     int file_error = 0;
     for(int i = 4; i < argc; i++){
@@ -52,6 +94,15 @@ void check_files(int argc, const char *argv[]){
     }
 }
 
+/**
+* check_params
+*
+* Vérifie que tous les paramètres du programme sont correcte,
+*    quitte le programme sinon.
+*
+* @param int argc : nombre de paramètres du programme.
+* @param const char *argv[] : Paramètres du programme.
+**/
 void check_params(int argc, const char *argv[]){
     check_nb_params(argc, 5, argv[0]);
     check_type_comptage(argv[1]);
@@ -60,6 +111,13 @@ void check_params(int argc, const char *argv[]){
     check_files(argc, argv);
 }
 
+/**
+* Retourne le nombre d'enfants en respectant les règles définies.
+*
+* @param int nb_enfants : Le nombre d'enfants entré par l'utilisateur.
+*
+* @return int : Le nombre d'enfants respectant les règles définies.
+**/
 int set_nb_enfants(int nb_enfants){
     const int NB_ENFANT_MIN = 2;
     const int NB_ENFANT_MAX = 8;
@@ -79,6 +137,8 @@ int set_nb_enfants(int nb_enfants){
 /**
 * Check si un fork a bien fonctionné,
 * quitte le processus sinon.
+*
+* @param int fork_res : Resultat du fork().
 **/
 void fork_check(int fork_res){
     if(fork_res == -1){
@@ -90,7 +150,8 @@ void fork_check(int fork_res){
 /**
 * Initialise les processus producteur ou collecteur
 *
-* @param pid_father *c : char a tester
+* @param int pid_father : Le pid du processus père.
+* @param int *pid_son : Le pid du fils créer (producteur ou collecteur).
 */
 void init_p_or_c(int pid_father, int *pid_son){
     if(pid_father == getpid()){
@@ -105,30 +166,11 @@ void init_p_or_c(int pid_father, int *pid_son){
 /**
 * Return un bloc de donnée selon la taille souhaitée, à partir d'un fichier
 *
-* @param FILE *file : fichier contenant la donnée
-* @param int nb_lg : taille du bloc (nombre de ligne par bloc)
-*
-* @return char * : bloc de donnée
+* @param FileManager *fm : Contient les informations sur les fichiers.
+* @param char *data_block : Le buffer pour la données.
+* @param int nb_lg : Nombre de ligne par bloc de données.
+* @param int line_size : Ma taille d'une ligne.
 **/
-// void get_data_block(FileManager *fm, char *data_block, int nb_lg, int line_size){
-//     int i = 0;
-//     int remaining_lines = nb_lg;
-//     char data_line[line_size];
-//     fm_update_file(fm);
-//     while(i < remaining_lines && !fm->is_done){
-//         while (i < remaining_lines && fgets(data_line, line_size, fm->file)) {
-//             strcat(data_block, data_line);
-//             i++;
-//         }
-//         if(i < remaining_lines){
-//             fm->index++;
-//             remaining_lines -= i;
-//             i = 0;
-//         }
-//         fm_update_file(fm);
-//     }
-// }
-
 void get_data_block(FileManager *fm, char *data_block, int nb_lg, int line_size){
     int i = 0;
     int remaining_lines = nb_lg;
@@ -150,11 +192,10 @@ void get_data_block(FileManager *fm, char *data_block, int nb_lg, int line_size)
 
 
 /**
-* Compte le nombre d'occurrences d'un caractère dans une chaîne de caractère.
+* Compte le nombre d'occurrences de chaque caractères dans une chaîne de caractères.
 *
-* @prama char *data : la chaîne de caractère
-*
-* @return ElementArray : ElementArray avec le nombre d'occurrences de chaque caractère
+* @param char *data : la chaîne de caractère
+* @return ElementArray : ElementArray avec le nombre d'occurrences de chaque caractères
 **/
 ElementArray char_count(char *data){
     ElementArray ea = init_element_array();
@@ -170,6 +211,12 @@ ElementArray char_count(char *data){
     return ea;
 }
 
+/**
+* Compte le nombre d'occurrences de chaque mots dans une chaîne de caractères.
+*
+* @param char *data : la chaîne de caractère
+* @return ElementArray : ElementArray avec le nombre d'occurrences de chaque mots
+**/
 ElementArray word_count(char *data){
     char *separators = " \n\t\r!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~";
 
@@ -194,6 +241,12 @@ ElementArray word_count(char *data){
     return ea;
 }
 
+/**
+* Compte le nombre d'occurrences de chaque séparateurs dans une chaîne de caractères.
+*
+* @param char *data : la chaîne de caractère.
+* @return ElementArray : ElementArray avec le nombre d'occurrences de chaque séparateurs.
+**/
 ElementArray separator_count(char *data){
     ElementArray ea = init_element_array();
     int i = 0;
@@ -222,6 +275,13 @@ ElementArray separator_count(char *data){
     return ea;
 }
 
+/**
+* Retourne le nombre d'occurence de chaque éléments dans une chaîne de
+* caractères, en fonction d'un type.
+*
+* @param char type : Le type.
+* @param char *data : la chaîne de caractère.
+**/
 ElementArray get_count_by_type(char type, char *data){
     ElementArray ea;
     switch (type) {
@@ -239,10 +299,10 @@ ElementArray get_count_by_type(char type, char *data){
 }
 
 /**
-* send each Element of an ElementArray array from a work to the collecteur
+* send each Element of an ElementArray array from a worker to the collecteur
 *
-* @param ElementArray ea : the ElementArray that contains our data
-* @int *pipe_wtoc : pipe to communicate from worker to collecteur
+* @param ElementArray ea : the ElementArray that contains our data.
+* @int *pipe_wtoc : pipe to communicate from worker to collecteur.
 **/
 void send_data_wtoc(ElementArray ea, int *pipe_wtoc){
     for(int i = 0; i < ea.len; i++){
@@ -250,6 +310,12 @@ void send_data_wtoc(ElementArray ea, int *pipe_wtoc){
     }
 }
 
+/**
+* Vérifie si un type est valide.
+*
+* @param const char *type : Le type.
+* @return int : 1 si type valide, 0 sinon.
+**/
 int is_type_valid(const char *type){
     int is_valid = 0;
     if(strlen(type) != 1){
@@ -268,11 +334,17 @@ int is_type_valid(const char *type){
     return is_valid;
 }
 
-int is_number(const char *nb_enf){
+/**
+* Vérifie si une chaîne de caractères est un nombre.
+*
+* @param const char *str : La chaîne de caractères.
+* @return int : 1 si la chaine est un nombre, 0 sinon.
+**/
+int is_number(const char *str){
     int is_number = 1;
     int i = 0;
-    while(i < strlen(nb_enf) && is_number){
-        if(!isdigit(nb_enf[i])){
+    while(i < strlen(str) && is_number){
+        if(!isdigit(str[i])){
             is_number = 0;
         }
         i++;
