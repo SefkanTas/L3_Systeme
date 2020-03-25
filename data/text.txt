@@ -1,11 +1,10 @@
 1 Ceci est la premiere ligne
-2 Ceci est la seconde ligne
-3 Voici la troisieme ligne
-4 d'accord d'accord
+2 Ceci est, la seconde ligne
+3 Voici la troisieme ligne !
+4 d'accord : d'accord
 5 Je n'ai plus d'insipiration
 6 Il est treize heure
 7 Loremp ipsum
 8 Nestle pure life
 9 c'est pas faux
-10 Et voici la dixieme ligne
-,;:!
+10 Et voici la dixieme (ligne)

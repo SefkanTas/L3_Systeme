@@ -1,0 +1,42 @@
+-1211981584
+-1211981584
+END worker : 1
+END worker : 0
+1 => 1
+CECI => 2
+EST => 3
+LA => 4
+PREMIERE => 1
+LIGNE => 4
+2 => 1
+SECONDE => 1
+3 => 1
+VOICI => 2
+TROISIEME => 1
+4 => 1
+D'ACCORD => 2
+5 => 1
+JE => 1
+N'AI => 1
+PLUS => 1
+D'INSIPIRATION => 1
+6 => 1
+IL => 1
+TREIZE => 1
+HEURE => 1
+7 => 1
+LOREMP => 1
+IPSUM => 1
+8 => 1
+NESTLE => 1
+PURE => 1
+LIFE => 1
+9 => 1
+C'EST => 1
+PAS => 1
+FAUX => 1
+10 => 1
+ET => 1
+DIXIEME => 1
+
+----- CLIENT : fermeture du programme -----

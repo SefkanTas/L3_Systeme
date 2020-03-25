@@ -4,9 +4,77 @@
 #include <string.h>
 #include <unistd.h>
 
+
 #include "../headers/element.h"
 #include "../headers/file_manager.h"
+#include "../headers/pwclib.h"
 
+
+void check_nb_params(int nb_param, int nb_required, const char *name){
+    if(nb_param < nb_required){
+        printf("Nombre de parametre inccorecte.\n");
+        printf("%s type_comptage nb_enfants nb_lg liste_fichiers\n", name);
+        exit(EXIT_FAILURE);
+    }
+}
+
+void check_type_comptage(const char *param){
+    if(!is_type_valid(param)){
+        printf("Le type de comptage est invalide (c, w, s).\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void check_nb_enfants(const char *param){
+    if(!is_number(param)){
+        printf("Le nombre d'enfants est invalide.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void check_nb_lg(const char *param){
+    if(!is_number(param)){
+        printf("Le nombre de lignes est invalide.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void check_files(int argc, const char *argv[]){
+    int file_error = 0;
+    for(int i = 4; i < argc; i++){
+        if(access(argv[i], R_OK) == -1){
+            printf("Le fichier \"%s\" n'existe pas.\n", argv[i]);
+            file_error = 1;
+        }
+    }
+    if(file_error){
+        exit(EXIT_FAILURE);
+    }
+}
+
+void check_params(int argc, const char *argv[]){
+    check_nb_params(argc, 5, argv[0]);
+    check_type_comptage(argv[1]);
+    check_nb_enfants(argv[2]);
+    check_nb_lg(argv[3]);
+    check_files(argc, argv);
+}
+
+int set_nb_enfants(int nb_enfants){
+    const int NB_ENFANT_MIN = 2;
+    const int NB_ENFANT_MAX = 8;
+
+    if(nb_enfants == 0){
+        nb_enfants = sysconf(_SC_NPROCESSORS_ONLN) - 2;
+    }
+    if(nb_enfants < NB_ENFANT_MIN){
+        nb_enfants = NB_ENFANT_MIN;
+    }
+    else if (nb_enfants > NB_ENFANT_MAX) {
+        nb_enfants = NB_ENFANT_MAX;
+    }
+    return nb_enfants;
+}
 
 /**
 * Check si un fork a bien fonctionné,
@@ -42,6 +110,25 @@ void init_p_or_c(int pid_father, int *pid_son){
 *
 * @return char * : bloc de donnée
 **/
+// void get_data_block(FileManager *fm, char *data_block, int nb_lg, int line_size){
+//     int i = 0;
+//     int remaining_lines = nb_lg;
+//     char data_line[line_size];
+//     fm_update_file(fm);
+//     while(i < remaining_lines && !fm->is_done){
+//         while (i < remaining_lines && fgets(data_line, line_size, fm->file)) {
+//             strcat(data_block, data_line);
+//             i++;
+//         }
+//         if(i < remaining_lines){
+//             fm->index++;
+//             remaining_lines -= i;
+//             i = 0;
+//         }
+//         fm_update_file(fm);
+//     }
+// }
+
 void get_data_block(FileManager *fm, char *data_block, int nb_lg, int line_size){
     int i = 0;
     int remaining_lines = nb_lg;
@@ -60,6 +147,7 @@ void get_data_block(FileManager *fm, char *data_block, int nb_lg, int line_size)
         fm_update_file(fm);
     }
 }
+
 
 /**
 * Compte le nombre d'occurrences d'un caractère dans une chaîne de caractère.
@@ -83,7 +171,7 @@ ElementArray char_count(char *data){
 }
 
 ElementArray word_count(char *data){
-    char *separators = " \n\t,;!?.:\r";
+    char *separators = " \n\t\r!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~";
 
     ElementArray ea = init_element_array();
 
@@ -131,6 +219,22 @@ ElementArray separator_count(char *data){
         i++;
     }
 
+    return ea;
+}
+
+ElementArray get_count_by_type(char type, char *data){
+    ElementArray ea;
+    switch (type) {
+        case 'c':
+            ea = char_count(data);
+            break;
+        case 'w':
+            ea = word_count(data);
+            break;
+        case 's':
+            ea = separator_count(data);
+            break;
+    }
     return ea;
 }
 

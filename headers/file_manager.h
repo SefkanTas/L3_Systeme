@@ -12,5 +12,6 @@ typedef struct FileManager{
 
 FILE * get_file(char *path);
 void fm_update_file(FileManager *fm);
+void fm_free_files_path(FileManager *fm);
 
 #endif
