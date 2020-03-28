@@ -100,6 +100,9 @@ int main(int argc, char const *argv[]) {
 
         fm_free_files_path(&fm);
         close(pipe_wtop[0]);
+        for (int i = 0; i < nb_enfants; i++) {
+            close(pipes_ptow[i][1]);
+        }
     }
 
 
