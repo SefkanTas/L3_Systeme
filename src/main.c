@@ -7,7 +7,7 @@
 
 #include "../headers/element.h"
 #include "../headers/file_manager.h"
-#include "../headers/pwclib.h"
+#include "../headers/wcplib.h"
 
 int main(int argc, char const *argv[]) {
 
@@ -161,6 +161,7 @@ int main(int argc, char const *argv[]) {
 
         display_element_array(ea_count);
         free_element_array(&ea_count);
+        close(pipe_wtoc[0]);
     }
 
     if(pid_client == getpid()){

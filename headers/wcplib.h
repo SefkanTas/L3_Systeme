@@ -1,5 +1,5 @@
-#ifndef PWCLIB_H
-#define PWCLIB_H
+#ifndef WCPLIB_H
+#define WCPLIB_H
 
 void check_nb_params(int nb_param, int nb_required, const char *name);
 void check_type_comptage(const char *param);
